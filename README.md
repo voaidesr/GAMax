@@ -10,7 +10,6 @@ Genetic Algorithm Maximizer - a web app that evolves a population to find the ma
 | Frontend | Vite, Plotly.js |
 | Container | Docker, docker-compose |
 
----
 
 ## Run with Docker
 
@@ -21,7 +20,6 @@ docker-compose up --build
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
 
----
 
 ## Run locally (development)
 
@@ -43,7 +41,6 @@ npm run dev
 Frontend dev server: http://localhost:5173
 API calls are automatically proxied to `localhost:8080` via Vite.
 
----
 
 ## API
 
@@ -53,7 +50,6 @@ API calls are automatically proxied to `localhost:8080` via Vite.
 | `/api/init_population` | POST | Generate the initial random population |
 | `/api/next_generation` | POST | Step one generation forward |
 
----
 
 ## Usage
 
