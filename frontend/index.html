@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GAMax — Genetic Algorithm Maximizer</title>
+    <meta name="description" content="Interactive genetic algorithm optimizer that maximizes a quadratic polynomial, generation by generation." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+
+      <!-- ── Main layout ─────────────────────────────────────────────────── -->
+      <main id="app-main">
+
+        <!-- Sidebar: inputs only, no section headers for function fields -->
+        <aside id="sidebar">
+
+          <!-- Polynomial coefficients — no "FUNCTION" title, no hint text -->
+          <div class="field-cluster">
+            <div class="inline-fields three-col">
+              <div class="field">
+                <label class="field-label" for="coef-a">a</label>
+                <input class="mono" type="number" id="coef-a" value="-1" step="0.1" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="coef-b">b</label>
+                <input class="mono" type="number" id="coef-b" value="1" step="0.1" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="coef-c">c</label>
+                <input class="mono" type="number" id="coef-c" value="2" step="0.1" />
+              </div>
+            </div>
+            <div class="inline-fields two-col">
+              <div class="field">
+                <label class="field-label" for="dom-a">x min</label>
+                <input class="mono" type="number" id="dom-a" value="-1" step="0.5" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="dom-b">x max</label>
+                <input class="mono" type="number" id="dom-b" value="3" step="0.5" />
+              </div>
+            </div>
+          </div>
+
+          <!-- GA Parameters -->
+          <section class="form-section">
+            <h2 class="section-title">GA Parameters</h2>
+            <div class="inline-fields two-col">
+              <div class="field">
+                <label class="field-label" for="pop-size">Population</label>
+                <input class="mono" type="number" id="pop-size" value="20" min="2" step="1" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="num-gens">Generations</label>
+                <input class="mono" type="number" id="num-gens" value="50" min="1" step="1" />
+              </div>
+            </div>
+            <div class="inline-fields two-col">
+              <div class="field">
+                <label class="field-label" for="cross-p">Crossover p</label>
+                <input class="mono" type="number" id="cross-p" value="0.6" min="0" max="1" step="0.05" />
+              </div>
+              <div class="field">
+                <label class="field-label" for="mut-p">Mutation p</label>
+                <input class="mono" type="number" id="mut-p" value="0.01" min="0" max="1" step="0.001" />
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label" for="precision">Precision</label>
+              <input class="mono" type="number" id="precision" value="5" min="1" max="10" step="1" />
+            </div>
+          </section>
+
+          <!-- Seed -->
+          <div class="field">
+            <label class="field-label" for="seed">Seed</label>
+            <div class="seed-input-row">
+              <input class="mono" type="number" id="seed" min="0" placeholder="integer" />
+              <button id="btn-randomize" class="btn-icon" title="Randomize seed" aria-label="Randomize seed">🎲</button>
+            </div>
+          </div>
+
+          <!-- Initialize (only action in sidebar) -->
+          <button id="btn-init" class="btn btn-primary">Initialize</button>
+
+          <!-- Completion summary -->
+          <div id="summary" role="status" aria-live="polite"></div>
+
+        </aside>
+
+        <!-- ── Chart panel ──────────────────────────────────────────────── -->
+        <div id="chart-panel">
+
+          <!-- Stats bar: generation info + action buttons, always visible -->
+          <div id="stats-bar">
+            <div id="stats-items">
+              <div class="stat-block" id="stat-gen-block">
+                <span class="stat-label">Generation</span>
+                <span class="stat-value stat-gen-val mono" id="stat-gen">—</span>
+              </div>
+              <div class="stat-sep"></div>
+              <div class="stat-block">
+                <span class="stat-label">Maximum</span>
+                <span class="stat-value stat-accent mono" id="stat-max">—</span>
+              </div>
+              <div class="stat-sep"></div>
+              <div class="stat-block">
+                <span class="stat-label">Average</span>
+                <span class="stat-value stat-blue mono" id="stat-avg">—</span>
+              </div>
+              <div class="stat-sep"></div>
+              <div class="stat-block">
+                <span class="stat-label">Theoretical Maximum</span>
+                <span class="stat-value stat-muted mono" id="stat-theory">—</span>
+              </div>
+            </div>
+            <div id="stats-actions">
+              <button id="btn-next"      class="btn btn-sm btn-secondary" disabled>Next Generation</button>
+              <button id="btn-fastfwd"   class="btn btn-sm btn-ghost"     disabled>Fast Forward</button>
+              <button id="btn-toggle-evo" class="btn btn-sm btn-ghost">Evolution</button>
+            </div>
+          </div>
+
+          <!-- Chart area (placeholder + Plotly live together) -->
+          <div id="chart-area">
+            <div id="chart-placeholder">
+              <p class="mono muted">Configure parameters and click <strong>Initialize</strong> to begin.</p>
+            </div>
+            <div id="chart"></div>
+          </div>
+
+          <!-- Evolution panel — full-screen overlay -->
+          <div id="evolution-panel" aria-label="Fitness evolution over generations">
+            <div id="evo-header">
+              <span id="evo-title">Fitness Evolution</span>
+              <button id="btn-evo-close">Close</button>
+            </div>
+            <div id="evolution-chart"></div>
+          </div>
+
+        </div><!-- /chart-panel -->
+
+      </main>
+    </div>
+
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>
