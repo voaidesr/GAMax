@@ -1,5 +1,7 @@
 module Genetic
   ( stepGeneration,
+    initConfig,
+    initPop,
   )
 where
 
@@ -322,3 +324,15 @@ stepGeneration cfg pop rng =
       (seedInt, finalRng) = random rng4
       result = NextGenResponse {nextPop = finalPop, stats = stat, nextSeed = seedInt}
    in (result, finalRng)
+
+initConfig :: Int -> (Double, Double) -> (Double, Double, Double) -> Int -> Double -> Double -> Config
+initConfig pSz d c p cP mP =
+  let chromL = chromLength d p
+   in Config pSz d c p cP mP chromL
+
+initPop :: Config -> StdGen -> (InitPopResponse, StdGen)
+initPop cfg rng =
+  let (pop, rng1) = makePopulation cfg rng
+      (intSeed, rng2) = random rng1
+      result = InitPopResponse pop intSeed
+   in (result, rng2)
